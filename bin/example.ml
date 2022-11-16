@@ -67,6 +67,7 @@ let main () =
              ];
            exclude_package_prefix "ocaml-option-";
            exclude_package_prefix "ocaml-options-";
+           exclude_package_prefix "dkml-";
          ])
   |> trace_package_set ~label:"all"
   |> Closure.apply repo
@@ -74,9 +75,9 @@ let main () =
   |> Check.apply repo |> trace_errors_map |> Check.remove_packages_with_errors
   |> trace_package_set ~label:"after check"
   |> Closure.apply repo
-  (* |> trace_package_set ~label:"after second closure apply" *)
+  |> trace_package_set ~label:"after second closure apply"
   |> Closure.apply repo
-  (* |> trace_package_set ~label:"after third closure apply" *)
+  |> trace_package_set ~label:"after third closure apply"
   |> Monorepo.analyze repo
   |> Monorepo.opam_file |> OpamFile.OPAM.write_to_string |> print_endline
 
