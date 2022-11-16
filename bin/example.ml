@@ -13,6 +13,18 @@ let trace_package_set ~label package_set =
   Fmt.epr "%s: %a\n" label dump_package_set package_set;
   package_set
 
+let dump_error_map ppf =
+  OpamPackage.Map.iter
+    (fun package result ->
+      match result with
+      | Ok () -> ()
+      | Error err ->
+          Fmt.pf ppf "%a: %a\n" dump_package package Check.pp_error err)
+
+let trace_errors_map map =
+  Fmt.epr "%a\n" dump_error_map map;
+  map
+
 let main () =
   let main_repo = Repository.path "/home/marek/tarides/opam-repository" in
   let stats = Repository.Stats.create () in
@@ -59,13 +71,13 @@ let main () =
   |> trace_package_set ~label:"all"
   |> Closure.apply repo
   |> trace_package_set ~label:"after first closure apply"
-  |> Check.apply repo |> Check.remove_packages_with_errors
+  |> Check.apply repo |> trace_errors_map |> Check.remove_packages_with_errors
   |> trace_package_set ~label:"after check"
   |> Closure.apply repo
-  |> trace_package_set ~label:"after second closure apply"
+  (* |> trace_package_set ~label:"after second closure apply" *)
   |> Closure.apply repo
-  |> trace_package_set ~label:"after third closure apply"
-  |> Monorepo.analyze repo |> Monorepo.opam_file
-  |> OpamFile.OPAM.write_to_string |> print_endline
+  (* |> trace_package_set ~label:"after third closure apply" *)
+  |> Monorepo.analyze repo
+  |> Monorepo.opam_file |> OpamFile.OPAM.write_to_string |> print_endline
 
 let () = main ()
