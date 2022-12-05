@@ -1,0 +1,3 @@
+(library
+ (name package_db)
+ (libraries switch-builder opam-format))

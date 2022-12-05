@@ -14,8 +14,7 @@ let trace_package_set ~label package_set =
   package_set
 
 let dump_error_map ppf =
-  OpamPackage.Map.iter
-    (fun package result ->
+  OpamPackage.Map.iter (fun package result ->
       match result with
       | Ok () -> ()
       | Error err ->
@@ -26,7 +25,7 @@ let trace_errors_map map =
   map
 
 let main () =
-  let main_repo = Repository.path "/home/marek/tarides/opam-repository" in
+  let main_repo = Repository.path "/home/s/src/opam-repository" in
   let stats = Repository.Stats.create () in
   let cache = Repository.Cache.create () in
   let repo = Repository.cache cache (Repository.stats stats main_repo) in
@@ -36,12 +35,15 @@ let main () =
          (always_latest
          |> override (OpamPackage.of_string "ocaml-config.2")
          |> override (OpamPackage.of_string "ocaml.4.14.0")
-         |> override (OpamPackage.of_string "ocaml-base-compiler.4.14.0")))
+         |> override (OpamPackage.of_string "ocaml-base-compiler.4.14.0")
+         |> override (OpamPackage.of_string "mirage-clock.4.1.0")
+         |> override (OpamPackage.of_string "mirage-clock-solo5.4.1.0")))
   |> Select.(
        apply repo
          [
            has_no_depexts;
            is_compatible_with (OpamPackage.of_string "ocaml.4.14.0");
+           is_compatible_with (OpamPackage.of_string "dune.3.6.0");
            exclude_package_names
              [
                OpamPackage.Name.of_string "base-domains";
@@ -78,7 +80,7 @@ let main () =
   |> trace_package_set ~label:"after second closure apply"
   |> Closure.apply repo
   |> trace_package_set ~label:"after third closure apply"
-  |> Monorepo.analyze repo
-  |> Monorepo.opam_file |> OpamFile.OPAM.write_to_string |> print_endline
+  |> Monorepo.analyze repo |> Monorepo.opam_file
+  |> OpamFile.OPAM.write_to_string |> print_endline
 
 let () = main ()
